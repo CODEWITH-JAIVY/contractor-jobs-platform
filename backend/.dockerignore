@@ -1,0 +1,5 @@
+target/
+.git/
+*.md
+firebase-service-account.json
+.env

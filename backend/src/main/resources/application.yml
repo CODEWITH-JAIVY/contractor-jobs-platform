@@ -1,0 +1,31 @@
+server:
+  port: 8080
+  forward-headers-strategy: ${FORWARD_HEADERS:none}   # nginx/caddy ke peeche ho to "framework" karo (real client IP ke liye)
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/contractor_app?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true}
+    username: ${DB_USER:root}
+    password: ${DB_PASSWORD:root}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+app:
+  env: ${APP_ENV:dev}            # prod me StartupChecks galat config par app start hi nahi hone dega
+  jwt:
+    secret: ${JWT_SECRET:change-this-secret-key-min-32-characters-long-please}
+    expiry-ms: 86400000
+  otp:
+    dev-mode: ${OTP_DEV_MODE:true}   # true = OTP hamesha 123456 (sirf dev)
+  sms:
+    provider: ${SMS_PROVIDER:log}    # log | msg91
+    msg91:
+      auth-key: ${MSG91_AUTH_KEY:}
+      template-id: ${MSG91_TEMPLATE_ID:}
+  admin:
+    phones: ${ADMIN_PHONES:}         # comma separated 10-digit numbers, startup par ADMIN ban jate hain
+  google:
+    client-id: ${GOOGLE_CLIENT_ID:}   # Web client ID (mobile app ke EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID wali). Khali = Google login band
+  fcm:
+    enabled: ${FCM_ENABLED:false}
+    credentials-path: ${FCM_CREDENTIALS:./firebase-service-account.json}

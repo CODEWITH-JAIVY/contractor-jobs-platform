@@ -1,0 +1,34 @@
+# Server par: .env file banao (neeche ke variables) phir: docker compose -f docker-compose.prod.yml up -d --build
+# HTTPS ke liye is app ke aage Caddy/Nginx lagao (Play Store build me http allowed nahi rakhna).
+services:
+  mysql:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: contractor_app
+    volumes: [mysql_data:/var/lib/mysql]
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on: [mysql]
+    ports: ["8080:8080"]
+    environment:
+      APP_ENV: prod
+      DB_URL: jdbc:mysql://mysql:3306/contractor_app?useSSL=false&allowPublicKeyRetrieval=true
+      DB_USER: root
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      OTP_DEV_MODE: "false"
+      SMS_PROVIDER: msg91
+      MSG91_AUTH_KEY: ${MSG91_AUTH_KEY}
+      MSG91_TEMPLATE_ID: ${MSG91_TEMPLATE_ID}
+      ADMIN_PHONES: ${ADMIN_PHONES}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      FORWARD_HEADERS: framework
+      FCM_ENABLED: "true"
+      FCM_CREDENTIALS: /secrets/firebase-service-account.json
+    volumes:
+      - ./firebase-service-account.json:/secrets/firebase-service-account.json:ro
+volumes:
+  mysql_data:

@@ -1,0 +1,15 @@
+# backend
+backend/target/
+backend/firebase-service-account.json
+backend/.env
+# flutter
+.dart_tool/
+build/
+key.properties
+*.jks
+*.keystore
+# ide
+.idea/
+*.iml
+.vscode/
+.DS_Store

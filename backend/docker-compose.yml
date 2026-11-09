@@ -1,0 +1,33 @@
+# Dev: ek command me MySQL + backend:       docker compose up --build
+# Sirf MySQL chahiye (mvn spring-boot:run ke liye):  docker compose up -d mysql
+# Logs:  docker compose logs -f app      Band:  docker compose down      Data bhi hatao:  docker compose down -v
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: contractor_app
+    ports: ["3307:3306"]            # local MySQL pehle se chal raha ho to ye port badal do (jaise "3307:3306")
+    volumes: [mysql_data:/var/lib/mysql]
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+  app:
+    build: .
+    depends_on:
+      mysql:
+        condition: service_healthy   # MySQL ready hone ke baad hi backend start
+    ports: ["8080:8080"]
+    environment:
+      DB_URL: jdbc:mysql://mysql:3306/contractor_app?useSSL=false&allowPublicKeyRetrieval=true
+      DB_USER: root
+      DB_PASSWORD: root
+      APP_ENV: dev
+      OTP_DEV_MODE: "true"           # OTP hamesha 123456
+      SMS_PROVIDER: log
+      ADMIN_PHONES: ${ADMIN_PHONES:-}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+volumes:
+  mysql_data:
