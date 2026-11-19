@@ -1,5 +1,3 @@
-# Server par: .env file banao (neeche ke variables) phir: docker compose -f docker-compose.prod.yml up -d --build
-# HTTPS ke liye is app ke aage Caddy/Nginx lagao (Play Store build me http allowed nahi rakhna).
 services:
   mysql:
     image: mysql:8.4
@@ -8,11 +6,19 @@ services:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
       MYSQL_DATABASE: contractor_app
     volumes: [mysql_data:/var/lib/mysql]
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
   app:
     build: .
     restart: unless-stopped
-    depends_on: [mysql]
-    ports: ["8080:8080"]
+    depends_on:
+      mysql:
+        condition: service_healthy
+    expose: ["8080"]
     environment:
       APP_ENV: prod
       DB_URL: jdbc:mysql://mysql:3306/contractor_app?useSSL=false&allowPublicKeyRetrieval=true
@@ -30,5 +36,20 @@ services:
       FCM_CREDENTIALS: /secrets/firebase-service-account.json
     volumes:
       - ./firebase-service-account.json:/secrets/firebase-service-account.json:ro
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    depends_on: [app]
+    ports: ["80:80", "443:443"]
+    environment:
+      API_DOMAIN: ${API_DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+
 volumes:
   mysql_data:
+  caddy_data:
+  caddy_config:

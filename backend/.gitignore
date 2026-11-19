@@ -2,3 +2,6 @@ target/
 firebase-service-account.json
 *.iml
 .idea/
+.env
+.env.prod
+firebase-service-account.json
