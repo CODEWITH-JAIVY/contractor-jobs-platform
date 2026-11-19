@@ -7,3 +7,10 @@ ios/
 google-services.json
 *.jks
 *.keystore
+
+.env.*
+!.env.example
+!.env.production.example
+credentials.json
+*.p12
+*.pem

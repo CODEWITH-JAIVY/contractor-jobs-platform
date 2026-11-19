@@ -44,7 +44,7 @@ public class PushSender {
         Set<Integer> invalid = new HashSet<>();
         if (tokens.isEmpty()) return invalid;
         if (!enabled) {
-            log.info("[FCM disabled] {} devices <- {} | {}", tokens.size(), title, body);
+            log.info("FCM disabled: skipped notifications for {} devices", tokens.size());
             return invalid;
         }
         try {
@@ -62,7 +62,7 @@ public class PushSender {
                 }
             }
         } catch (FirebaseMessagingException e) {
-            log.error("FCM send fail: {}", e.getMessage());
+            log.error("FCM delivery failed");
         }
         return invalid;
     }

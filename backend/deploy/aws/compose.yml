@@ -1,0 +1,33 @@
+# Single EC2 instance behind an HTTPS ALB; external private RDS MySQL.
+# Do not start until RELEASE.md prerequisites and schema provisioning are complete.
+services:
+  app:
+    image: ${BACKEND_IMAGE:?Supply the immutable ECR image digest}
+    restart: unless-stopped
+    user: "10001:10001"
+    read_only: true
+    tmpfs:
+      - /tmp:size=128m,mode=1777
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    ports: ["8080:8080"]
+    env_file:
+      - ${RUNTIME_ENV_FILE:?Supply a protected runtime environment file outside the repository}
+    environment:
+      APP_ENV: prod
+      SPRING_PROFILES_ACTIVE: prod
+      OTP_DEV_MODE: "false"
+      SMS_PROVIDER: msg91
+      FORWARD_HEADERS: framework
+      FCM_ENABLED: "true"
+      FCM_CREDENTIALS: /run/secrets/firebase.json
+      JAVA_TOOL_OPTIONS: -XX:MaxRAMPercentage=70.0 -XX:+ExitOnOutOfMemoryError
+    volumes:
+      - ${FIREBASE_CREDENTIALS_FILE:?Supply a protected Firebase service-account file}:/run/secrets/firebase.json:ro
+      - ${RDS_TRUSTSTORE_FILE:?Supply the verified RDS CA Java truststore}:/run/secrets/rds-truststore.p12:ro
+    mem_limit: 1g
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

@@ -14,6 +14,9 @@ public class WorkerProfile {
     private User user;
     @Column(length = 200)
     private String skills;
+    /** Worker ka apna diya number (verify nahi). Contractor ko sirf apply karne par dikhta hai. */
+    @Column(length = 15)
+    private String contactPhone;
     private Integer experienceYears;
     @Column(length = 1000)
     private String about;

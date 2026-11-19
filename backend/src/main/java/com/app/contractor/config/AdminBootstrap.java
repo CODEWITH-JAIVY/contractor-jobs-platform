@@ -26,11 +26,11 @@ public class AdminBootstrap implements ApplicationRunner {
             User u = users.findByPhone(ph).orElse(null);
             if (u == null) {
                 users.save(User.builder().phone(ph).name("Admin").role(Role.ADMIN).build());
-                log.info("Admin bana diya: {}", ph);
+                log.info("Admin account created");
             } else if (u.getRole() != Role.ADMIN) {
                 u.setRole(Role.ADMIN);
                 users.save(u);
-                log.info("Existing user ko admin bana diya: {}", ph);
+                log.info("Existing account promoted to admin");
             }
         }
     }

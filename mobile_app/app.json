@@ -7,7 +7,7 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "android": {
-      "package": "com.app.contractorjobs",
+      "package": "com.sanjeet.contractorjobs",
       "adaptiveIcon": {
         "backgroundColor": "#1C2127",
         "foregroundImage": "./assets/android-icon-foreground.png",

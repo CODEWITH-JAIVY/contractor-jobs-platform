@@ -20,13 +20,16 @@ export type ContractorInfo = {
 };
 
 export type Applicant = {
-  applicationId: number; userId: number; name: string; phone: string; city?: string | null;
+  applicationId: number; userId: number; name: string; phone?: string | null; city?: string | null;
   status: ApplicationStatus; appliedAt: string; skills?: string | null; experienceYears?: number | null; about?: string | null;
 };
 
 export type MyApplication = { id: number; jobId: number; jobTitle: string; location: string; status: ApplicationStatus; createdAt: string };
 export type NotificationItem = { id: number; jobId?: number | null; title: string; body?: string | null; read: boolean; createdAt: string };
-export type WorkerProfile = { skills?: string | null; experienceYears?: number | null; about?: string | null };
+export type WorkerProfile = {
+  name?: string | null; city?: string | null; phone?: string | null; skills?: string | null;
+  experienceYears?: number | null; about?: string | null; completed: boolean;
+};
 
 export type AttendanceEntry = {
   date: string; status: AttendanceStatus; overtimeHours: number; note?: string | null;

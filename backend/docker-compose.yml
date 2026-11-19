@@ -28,6 +28,6 @@ services:
       OTP_DEV_MODE: "true"           # OTP hamesha 123456
       SMS_PROVIDER: log
       ADMIN_PHONES: ${ADMIN_PHONES:-}
-      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_ID: "380076161436-27quhf9h59ef013ertpe8nr9hdiepjbh.apps.googleusercontent.com"
 volumes:
   mysql_data:

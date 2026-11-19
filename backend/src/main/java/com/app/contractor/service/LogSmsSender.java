@@ -10,6 +10,6 @@ import org.springframework.stereotype.Component;
 public class LogSmsSender implements SmsSender {
     @Override
     public void sendOtp(String phone, String otp) {
-        log.info("[DEV SMS] OTP for {} = {}", phone, otp);
+        log.info("Development SMS skipped (no personal data logged)");
     }
 }

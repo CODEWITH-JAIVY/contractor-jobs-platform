@@ -1,0 +1,22 @@
+# Activate with SPRING_PROFILES_ACTIVE=prod as well as APP_ENV=prod.
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+      probes:
+        enabled: true
+      group:
+        readiness:
+          include: readinessState,db
+server:
+  error:
+    include-message: never
+    include-stacktrace: never

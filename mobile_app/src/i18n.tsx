@@ -29,7 +29,7 @@ const en = {
   'err.generic': 'Something went wrong. Please try again.',
   'err.status': 'Something went wrong ({status})',
   'err.validation': 'Please check the details you entered.',
-  'err.googleNotSet': 'Google sign-in is not set up yet (needs a dev build and EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID)',
+  'err.googleNotSet': 'Google sign-in is unavailable. Please try again later.',
   'err.googleToken': 'Could not get a token from Google. Check the setup.',
   'err.googleFail': 'Google sign-in failed{code}. Please try again.',
   // tabs and titles
@@ -51,6 +51,9 @@ const en = {
   'title.contractor': 'Contractor profile',
   'title.admin': 'Admin',
   // menu
+  'menu.options': 'Account options',
+  'menu.privacy': 'Privacy policy',
+  'menu.adsPrivacy': 'Ad privacy choices',
   'menu.profile': 'My profile',
   'menu.language': 'Language',
   'menu.logout': 'Log out',
@@ -181,6 +184,25 @@ const en = {
   'att.payAmount': 'Amount received (₹)',
   'att.payNote': 'Note (e.g. advance, weekly pay)',
   'att.payInvalid': 'Enter a valid amount',
+  // login (worker = Google, contractor = mobile OTP)
+  'login.tabWorker': 'Worker',
+  'login.tabContractor': 'Contractor',
+  'login.workerTitle': 'Sign in as a worker',
+  'login.workerNote': 'Workers sign in with Google. No OTP needed.',
+  'login.contractorTitle': 'Sign in as a contractor',
+  'login.contractorNote': 'Contractors verify with a mobile OTP.',
+  'login.devTitle': 'Testing only (no Google)',
+  'login.devEmail': 'Test email',
+  'login.devBtn': 'Test worker login',
+  // profile setup
+  'ps.title': 'Set up your profile',
+  'ps.sub': 'Contractors see this when you apply. It takes a minute.',
+  'ps.phone': 'Mobile number (optional)',
+  'ps.phoneHint': 'Contractors can call you on this number. It is shown only when you apply.',
+  'ps.continue': 'Save and continue',
+  'ps.skip': 'Skip for now',
+  'ps.need': 'Please enter your name and city',
+  'ap.noPhone': 'No phone number given',
 } as const;
 
 export type Key = keyof typeof en;
@@ -206,7 +228,7 @@ const hi: Record<Key, string> = {
   'err.generic': 'कुछ गड़बड़ हुई। फिर से कोशिश करें।',
   'err.status': 'कुछ गड़बड़ हुई ({status})',
   'err.validation': 'कृपया दर्ज की गई जानकारी जाँचें।',
-  'err.googleNotSet': 'Google लॉगिन अभी सेट नहीं है (डेव बिल्ड और EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID चाहिए)',
+  'err.googleNotSet': 'Google लॉगिन अभी उपलब्ध नहीं है। बाद में कोशिश करें।',
   'err.googleToken': 'Google से टोकन नहीं मिला। सेटअप जाँचें।',
   'err.googleFail': 'Google साइन-इन नहीं हो सका{code}। फिर से कोशिश करें।',
   'tab.feed': 'फ़ीड',
@@ -226,6 +248,9 @@ const hi: Record<Key, string> = {
   'title.jobDetail': 'जॉब की जानकारी',
   'title.contractor': 'ठेकेदार की प्रोफ़ाइल',
   'title.admin': 'एडमिन',
+  'menu.options': 'अकाउंट विकल्प',
+  'menu.privacy': 'गोपनीयता नीति',
+  'menu.adsPrivacy': 'विज्ञापन गोपनीयता विकल्प',
   'menu.profile': 'मेरी प्रोफ़ाइल',
   'menu.language': 'भाषा',
   'menu.logout': 'लॉग आउट',
@@ -348,6 +373,23 @@ const hi: Record<Key, string> = {
   'att.payAmount': 'कितने मिले (₹)',
   'att.payNote': 'नोट (जैसे: एडवांस, हफ़्ते का)',
   'att.payInvalid': 'सही रकम डालें',
+  'login.tabWorker': 'कामगार',
+  'login.tabContractor': 'ठेकेदार',
+  'login.workerTitle': 'कामगार के रूप में साइन इन करें',
+  'login.workerNote': 'कामगार Google से साइन इन करते हैं। OTP की ज़रूरत नहीं।',
+  'login.contractorTitle': 'ठेकेदार के रूप में साइन इन करें',
+  'login.contractorNote': 'ठेकेदार मोबाइल OTP से वेरिफ़ाई करते हैं।',
+  'login.devTitle': 'सिर्फ़ टेस्टिंग (बिना Google)',
+  'login.devEmail': 'टेस्ट ईमेल',
+  'login.devBtn': 'टेस्ट वर्कर लॉगिन',
+  'ps.title': 'अपनी प्रोफ़ाइल बनाएँ',
+  'ps.sub': 'आवेदन करने पर ठेकेदार यह देखता है। इसमें बस एक मिनट लगेगा।',
+  'ps.phone': 'मोबाइल नंबर (वैकल्पिक)',
+  'ps.phoneHint': 'ठेकेदार इसी नंबर पर आपको कॉल कर सकते हैं। यह सिर्फ़ आवेदन करने पर दिखता है।',
+  'ps.continue': 'सेव करके आगे बढ़ें',
+  'ps.skip': 'अभी छोड़ें',
+  'ps.need': 'कृपया अपना नाम और शहर डालें',
+  'ap.noPhone': 'फ़ोन नंबर नहीं दिया',
 };
 
 /** Backend ke (English) messages ka Hindi. Yahan na ho to English hi dikhta hai. */
@@ -387,6 +429,8 @@ const srvHi: Record<string, string> = {
   'Too many attempts. Try again in 10 minutes.': 'बहुत ज़्यादा कोशिशें। 10 मिनट बाद कोशिश करें।',
   'You do not have permission to do this': 'आपको यह काम करने की अनुमति नहीं है',
   'This entry already exists': 'यह एंट्री पहले से मौजूद है',
+  'Workers sign in with Google. Mobile OTP is for contractors.': 'कामगार Google से साइन इन करते हैं। मोबाइल OTP ठेकेदारों के लिए है।',
+  'Name is required for a new account': 'नए अकाउंट के लिए नाम ज़रूरी है',
 };
 
 const MONTHS: Record<Lang, string[]> = {

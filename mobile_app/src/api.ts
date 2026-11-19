@@ -1,7 +1,8 @@
 import { isKnownServerMsg, serverMsg, tr } from './i18n';
 
 /** Backend se baat: fetch + JWT. API_URL: emulator 10.0.2.2, real phone me laptop ka IP. */
-export const API_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://10.0.2.2:8080';
+const { apiUrl } = require('../config/release') as { apiUrl: (value: string | undefined, development: boolean) => string };
+export const API_URL = apiUrl(process.env.EXPO_PUBLIC_API_URL, __DEV__);
 
 export class ApiError extends Error {
   status: number;
@@ -32,24 +33,27 @@ async function request<T>(method: string, path: string, body?: unknown, query?: 
     : '';
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 15000);
+  const requestToken = token;
   let res: Response;
+  let text: string;
   try {
     res = await fetch(`${API_URL}${path}${qs ? `?${qs}` : ''}`, {
       method,
       headers: {
         'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(requestToken ? { Authorization: `Bearer ${requestToken}` } : {}),
       },
       body: body === undefined ? undefined : JSON.stringify(body),
       signal: controller.signal,
+      redirect: 'error',
     });
+    text = await res.text(); // Include slow response bodies in the timeout.
   } catch {
     throw new ApiError(0, tr('err.network'));
   } finally {
     clearTimeout(timer);
   }
 
-  const text = await res.text();
   let data: unknown = null;
   if (text) {
     try {
@@ -59,17 +63,18 @@ async function request<T>(method: string, path: string, body?: unknown, query?: 
     }
   }
   if (!res.ok) {
-    if (res.status === 401 && token) onUnauthorized?.();
+    if (res.status === 401 && requestToken && requestToken === token) onUnauthorized?.();
     const d = (data ?? {}) as { error?: string; fields?: Record<string, string> };
     let msg: string;
-    if (d.fields) {
-      const known = Object.values(d.fields).filter(isKnownServerMsg);
+    if (d.fields && typeof d.fields === 'object') {
+      const known = Object.values(d.fields).filter((v): v is string => typeof v === 'string' && isKnownServerMsg(v));
       msg = known.length ? known.map(serverMsg).join('\n') : tr('err.validation');
     } else {
-      msg = d.error ? serverMsg(d.error) : tr('err.status', { status: res.status });
+      msg = typeof d.error === 'string' && isKnownServerMsg(d.error) ? serverMsg(d.error) : tr('err.status', { status: res.status });
     }
     throw new ApiError(res.status, msg);
   }
+  if (text && data === null) throw new ApiError(res.status, tr('err.generic'));
   return data as T;
 }
 

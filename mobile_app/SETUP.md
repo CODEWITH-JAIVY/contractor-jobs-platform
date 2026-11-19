@@ -21,13 +21,13 @@ Ya bina Android Studio ke, cloud build: `npm i -g eas-cli && eas login && eas bu
 
 ### Google login
 1. Google Cloud Console: **Web** OAuth client banao. Iski Client ID `.env` me `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID` me do (backend ka `GOOGLE_CLIENT_ID` bhi wahi).
-2. Wahin **Android** OAuth client banao: package name `com.app.contractorjobs` + SHA-1.
+2. Wahin **Android** OAuth client banao: package name `com.sanjeet.contractorjobs` + SHA-1.
    - SHA-1: `npx expo prebuild --platform android` ke baad `cd android && ./gradlew signingReport` (ya `eas credentials`)
    - Play Console ki App signing wali SHA-1 bhi baad me add karni hogi.
 3. Dev build dobara banao (env badalne par).
 
 ### Push notification
-1. Firebase project me Android app jodo: package `com.app.contractorjobs`.
+1. Firebase project me Android app jodo: package `com.sanjeet.contractorjobs`.
 2. `google-services.json` download karke `mobile_app/` ke root me rakho (git me nahi jata). Dev build dobara banao.
 3. Backend: Firebase service-account JSON aur `FCM_ENABLED=true`.
 
@@ -57,3 +57,5 @@ src/screens/contractor/     ContractorTabs (Meri jobs, Job daalo, Profile)
 src/screens/admin/          AdminScreen
 ```
 Type check: `npm run typecheck`
+npm install -g eas-cli
+See RELEASE.md for the audited production workflow. Existing generated android/ is not a release source of truth.

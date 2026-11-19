@@ -11,7 +11,7 @@ import { JobTile } from '../../components/job';
 import { IconName, MetaRow, StatusPill, toast } from '../../components/ui';
 import type { RootStackParamList } from '../../navigation/types';
 import { useT } from '../../i18n';
-import { startPush } from '../../native/push';
+import { resetPush, startPush } from '../../native/push';
 import { useSession } from '../../session';
 import { C, timeAgo } from '../../theme';
 import type { Job, MyApplication, NotificationItem } from '../../types';
@@ -159,10 +159,11 @@ export default function WorkerTabs() {
 
   useEffect(() => {
     if (userId != null) void startPush(userId, (token) => api.put('/users/me/fcm-token', { token }));
+    return resetPush;
   }, [userId]);
 
   const icon = (active: IconName, inactive: IconName) =>
-    ({ focused }: { focused: boolean }) => <TabIcon active={active} inactive={inactive} focused={focused} />;
+    function TabBarIcon({ focused }: { focused: boolean }) { return <TabIcon active={active} inactive={inactive} focused={focused} />; };
 
   return (
     <Tab.Navigator screenOptions={tabScreenOptions}>

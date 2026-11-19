@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
-import { Modal, Pressable, Text, View } from 'react-native';
+import { Linking, Modal, Pressable, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { api, errText } from '../api';
+import { API_URL, api, errText } from '../api';
 import { useT } from '../i18n';
 import type { RootStackParamList } from '../navigation/types';
 import { useSession } from '../session';
 import { C } from '../theme';
+import { Ads } from '../native/ads';
 import { LanguageToggle, confirm, toast } from './ui';
 
 /** Header ke top-right me menu: Meri profile (worker), Logout, Account delete. */
@@ -45,7 +46,7 @@ export function HeaderMenu() {
 
   return (
     <>
-      <Pressable onPress={() => setOpen(true)} hitSlop={12} style={{ paddingHorizontal: 8 }}>
+      <Pressable accessibilityRole="button" accessibilityLabel={t('menu.options')} onPress={() => setOpen(true)} hitSlop={12} style={{ paddingHorizontal: 8 }}>
         <Ionicons name="ellipsis-vertical" size={22} color="#fff" />
       </Pressable>
       <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
@@ -61,6 +62,8 @@ export function HeaderMenu() {
               <Text style={{ fontSize: 12, color: C.steel, marginBottom: 6 }}>{t('menu.language')}</Text>
               <LanguageToggle />
             </View>
+            {item(t('menu.privacy'), () => { void Linking.openURL(`${API_URL}/privacy-policy.html`).catch(() => toast(t('err.generic'))); })}
+            {role === 'USER' ? item(t('menu.adsPrivacy'), () => { void Ads.privacyOptions().catch(() => toast(t('err.generic'))); }) : null}
             {item(t('menu.logout'), () => void logout())}
             {role !== 'ADMIN' ? item(t('menu.delete'), () => void deleteAccount(), C.red) : null}
           </View>

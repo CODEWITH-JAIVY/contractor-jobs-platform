@@ -8,7 +8,7 @@ import ContractorTabs from '../screens/contractor/ContractorTabs';
 import JobDetailScreen from '../screens/JobDetailScreen';
 import LoginScreen from '../screens/LoginScreen';
 import WorkerProfileScreen from '../screens/WorkerProfileScreen';
-import WorkerTabs from '../screens/worker/WorkerTabs';
+import WorkerGate from '../screens/worker/WorkerGate';
 import { useT } from '../i18n';
 import { useSession } from '../session';
 import { C } from '../theme';
@@ -37,7 +37,7 @@ export default function RootNavigator() {
           ) : role === 'CONTRACTOR' ? (
             <Stack.Screen name="ContractorHome" component={ContractorTabs} options={{ headerShown: false }} />
           ) : (
-            <Stack.Screen name="WorkerHome" component={WorkerTabs} options={{ headerShown: false }} />
+            <Stack.Screen name="WorkerHome" component={WorkerGate} options={{ headerShown: false }} />
           )}
           <Stack.Screen name="JobDetail" component={JobDetailScreen} options={{ title: t('title.jobDetail') }} />
           <Stack.Screen name="Contractor" component={ContractorScreen} options={{ title: t('title.contractor') }} />

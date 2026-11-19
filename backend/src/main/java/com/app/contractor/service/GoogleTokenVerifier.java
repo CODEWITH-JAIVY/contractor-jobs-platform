@@ -38,7 +38,7 @@ public class GoogleTokenVerifier {
                 throw new ApiException(HttpStatus.UNAUTHORIZED, "Is Google account ka email verified nahi hai");
             return new GoogleUser(p.getSubject(), p.getEmail(), (String) p.get("name"));
         } catch (GeneralSecurityException | IOException e) {
-            log.error("Google token verify error: {}", e.getMessage());
+            log.error("Google token verification failed");
             throw new ApiException(HttpStatus.BAD_GATEWAY, "Google se verify nahi ho paya, thodi der baad try karo");
         }
     }

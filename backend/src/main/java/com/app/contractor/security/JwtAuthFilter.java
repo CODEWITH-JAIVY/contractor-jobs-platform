@@ -14,11 +14,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.List;
+import com.app.contractor.repository.UserRepository;
 
 @Component
 @RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
     private final JwtService jwt;
+    private final UserRepository users;
 
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
@@ -28,9 +30,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             try {
                 Claims c = jwt.parse(h.substring(7));
                 Long userId = Long.valueOf(c.getSubject());
-                var auth = new UsernamePasswordAuthenticationToken(
-                        userId, null, List.of(new SimpleGrantedAuthority("ROLE_" + c.get("role", String.class))));
-                SecurityContextHolder.getContext().setAuthentication(auth);
+                // A deleted account must not retain access until its JWT expires.
+                // Current database roles also take effect immediately after a role change.
+                users.findById(userId).ifPresent(user -> {
+                    var auth = new UsernamePasswordAuthenticationToken(
+                            userId, null, List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name())));
+                    SecurityContextHolder.getContext().setAuthentication(auth);
+                });
             } catch (JwtException | IllegalArgumentException ignored) {
                 // invalid/expired token => unauthenticated, entry point 401 dega
             }

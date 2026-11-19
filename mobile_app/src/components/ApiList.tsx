@@ -30,6 +30,7 @@ export function ApiList<T>({ path, query, keyOf, renderItem, empty, emptyIcon = 
   const [err, setErr] = useState<string | null>(null);
   const meta = useRef({ page: 0, last: true, busy: false });
   const firstFocus = useRef(true);
+  const generation = useRef(0);
   const queryKey = JSON.stringify(query ?? {});
 
   const fetchPage = useCallback(
@@ -44,16 +45,22 @@ export function ApiList<T>({ path, query, keyOf, renderItem, empty, emptyIcon = 
 
   const loadFirst = useCallback(
     async (mode: 'spinner' | 'refresh' | 'silent') => {
-      if (mode === 'spinner') setLoading(true);
+      const current = ++generation.current;
+      meta.current.busy = true;
+      setMore(false);
+      if (mode === 'spinner') { setItems([]); setLoading(true); }
       if (mode === 'refresh') setRefreshing(true);
       try {
         const r = await fetchPage(0);
+        if (current !== generation.current) return;
         setItems(r.items);
         meta.current = { page: 0, last: r.last, busy: false };
         setErr(null);
       } catch (e) {
+        if (current !== generation.current) return;
         setErr(errText(e));
       }
+      meta.current.busy = false;
       setLoading(false);
       setRefreshing(false);
     },
@@ -61,7 +68,12 @@ export function ApiList<T>({ path, query, keyOf, renderItem, empty, emptyIcon = 
   );
 
   useEffect(() => {
+    // A changed endpoint starts an external request and resets the previous endpoint's rows.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void loadFirst('spinner');
+    // This is a request generation counter, not a DOM ref; invalidate outstanding requests.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    return () => { generation.current++; };
   }, [loadFirst]);
 
   // tab/screen par wapas aane par chupke se refresh
@@ -79,14 +91,18 @@ export function ApiList<T>({ path, query, keyOf, renderItem, empty, emptyIcon = 
 
   const loadMore = useCallback(async () => {
     const m = meta.current;
+    const current = generation.current;
     if (m.last || m.busy) return;
     m.busy = true;
     setMore(true);
     try {
       const r = await fetchPage(m.page + 1);
+      if (current !== generation.current) return;
       setItems((prev) => [...prev, ...r.items]);
       meta.current = { page: m.page + 1, last: r.last, busy: false };
-    } catch {
+    } catch (e) {
+      if (current !== generation.current) return;
+      setErr(errText(e));
       meta.current.busy = false; // agli scroll par dobara try
     }
     setMore(false);
@@ -138,7 +154,12 @@ export function ApiList<T>({ path, query, keyOf, renderItem, empty, emptyIcon = 
           <EmptyState icon={emptyIcon} text={empty ?? t('common.empty')} />
         )
       }
-      ListFooterComponent={more ? <ActivityIndicator color={C.ink} style={{ padding: 16 }} /> : undefined}
+      ListFooterComponent={more ? <ActivityIndicator color={C.ink} style={{ padding: 16 }} /> : err && items.length > 0 ? (
+        <Pressable accessibilityRole="button" onPress={() => void loadFirst('refresh')} style={{ padding: 16 }}>
+          <Text style={{ color: C.red }}>{err}</Text>
+          <Text style={{ color: C.ink }}>{t('common.retry')}</Text>
+        </Pressable>
+      ) : undefined}
       onEndReached={() => void loadMore()}
       onEndReachedThreshold={0.5}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => void loadFirst('refresh')} colors={[C.ink]} />}

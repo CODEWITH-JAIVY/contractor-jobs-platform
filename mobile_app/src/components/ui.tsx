@@ -44,10 +44,14 @@ export function BigButton({ label, onPress, icon, outlined, danger, disabled, co
   const fg = disabled ? C.steel : danger ? C.red : C.ink;
   return (
     <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityState={{ disabled: !!disabled }}
+      disabled={disabled}
       onPress={disabled ? undefined : onPress}
       style={({ pressed }) => [
         s.btn,
-        compact && { height: 44 },
+        compact && { minHeight: 44 },
         outlined || danger
           ? { backgroundColor: 'transparent', borderWidth: 1.5, borderColor: disabled ? C.line : danger ? C.red : C.ink }
           : { backgroundColor: disabled ? C.line : C.yellow },
@@ -165,6 +169,7 @@ export function Field({ label, value, onChangeText, keyboardType, multiline, max
       >
         {prefix ? <Text style={{ fontSize: 16, color: C.steel, marginRight: 6 }}>{prefix}</Text> : null}
         <TextInput
+          accessibilityLabel={label}
           value={value}
           onChangeText={onChangeText}
           keyboardType={keyboardType}
@@ -225,6 +230,6 @@ export function LanguageToggle({ dark }: { dark?: boolean }) {
 export const Divider = () => <View style={{ height: 1, backgroundColor: C.line }} />;
 
 const s = StyleSheet.create({
-  btn: { height: 50, borderRadius: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 16 },
+  btn: { minHeight: 50, paddingVertical: 12, borderRadius: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 16 },
   btnText: { fontSize: 16, fontWeight: '700' },
 });

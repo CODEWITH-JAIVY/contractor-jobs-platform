@@ -1,0 +1,15 @@
+node_modules/
+.expo/
+android/
+ios/
+dist/
+.env
+.env.*
+!.env.example
+!.env.production.example
+google-services.json
+credentials.json
+*.jks
+*.keystore
+*.p12
+*.pem

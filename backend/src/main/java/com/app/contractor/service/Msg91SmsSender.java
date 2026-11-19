@@ -45,11 +45,12 @@ public class Msg91SmsSender implements SmsSender {
                     .body("{}")
                     .retrieve().body(String.class);
             if (res == null || !res.toLowerCase().contains("success")) {
-                log.error("MSG91 error response: {}", res);
+                log.error("MSG91 rejected the SMS request");
                 throw new ApiException(HttpStatus.BAD_GATEWAY, "SMS bhejne me problem, thodi der baad try karo");
             }
         } catch (RestClientException e) {
-            log.error("MSG91 call fail: {}", e.getMessage());
+            // Provider exceptions can include the URL containing phone and OTP.
+            log.error("MSG91 request failed");
             throw new ApiException(HttpStatus.BAD_GATEWAY, "SMS bhejne me problem, thodi der baad try karo");
         }
     }

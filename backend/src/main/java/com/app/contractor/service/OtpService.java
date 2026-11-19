@@ -44,16 +44,16 @@ public class OtpService {
         Entry e = store.get(phone);
         if (e == null) return false;
         synchronized (e) {
+            if (store.get(phone) != e) return false;
             if (Instant.now().isAfter(e.expires) || e.attempts >= MAX_ATTEMPTS) {
-                store.remove(phone);
+                store.remove(phone, e);
                 return false;
             }
             if (!e.otp.equals(otp)) {
                 e.attempts++;
                 return false;
             }
-            store.remove(phone);
-            return true;
+            return store.remove(phone, e);
         }
     }
 }

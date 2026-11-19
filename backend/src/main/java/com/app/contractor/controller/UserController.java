@@ -27,7 +27,16 @@ public class UserController {
     @PutMapping("/me/fcm-token")
     @Transactional
     public void fcm(@AuthenticationPrincipal Long uid, @Valid @RequestBody FcmTokenRequest r) {
+        users.clearOtherDeviceOwners(r.token(), uid);
         users.findById(uid).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "User nahi mila")).setFcmToken(r.token());
+    }
+
+    /** Stop notifications to a signed-out device. */
+    @DeleteMapping("/me/fcm-token")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Transactional
+    public void clearFcm(@AuthenticationPrincipal Long uid) {
+        users.findById(uid).ifPresent(u -> u.setFcmToken(null));
     }
 
     /** Account aur saara data permanently delete. */

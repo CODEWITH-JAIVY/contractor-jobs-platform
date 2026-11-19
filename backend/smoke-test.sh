@@ -23,7 +23,7 @@ expect_has()  { echo "$BODY" | grep -q "$2"; check "$1" $?; }
 echo "== Backend: $BASE"
 call GET /privacy-policy.html;                               expect_code "server chal raha hai (static page)" 200
 
-CP=$(rand_phone); WP=$(rand_phone)
+CP=$(rand_phone); WE="worker$RANDOM$RANDOM@example.com"
 echo "== Contractor signup ($CP)"
 call POST /auth/send-otp "" "{\"phone\":\"$CP\"}";           expect_code "OTP bheja" 200
 call POST /auth/verify-otp "" "{\"phone\":\"$CP\",\"otp\":\"123456\",\"name\":\"Test Contractor\",\"role\":\"CONTRACTOR\",\"city\":\"Noida\"}"
@@ -33,28 +33,34 @@ expect_code "contractor profile save" 200
 call POST /jobs "$CT" '{"title":"Mason chahiye","location":"Noida Sector 62","salary":900,"workersNeeded":5}'
 expect_code "job post" 201; JID=$(field id)
 
-echo "== Worker signup ($WP)"
-call POST /auth/send-otp "" "{\"phone\":\"$WP\"}";            expect_code "OTP bheja" 200
-call POST /auth/verify-otp "" "{\"phone\":\"$WP\",\"otp\":\"123456\",\"name\":\"Test Worker\",\"role\":\"USER\",\"city\":\"Noida\"}"
-expect_code "worker login/signup" 200; UT=$(field token)
-call POST /auth/verify-otp "" "{\"phone\":\"$WP\",\"otp\":\"000000\"}"; expect_code "galat OTP reject (401)" 401
+echo "== Worker signup (email, SMS nahi)"
+call POST /auth/dev-worker "" "{\"email\":\"$WE\",\"name\":\"Test Worker\"}"; expect_code "worker login (email, bina OTP)" 200; UT=$(field token)
+call GET /workers/me/profile "$UT";                          expect_has "profile pehle incomplete" '"completed":false'
+P2=$(rand_phone)
+call POST /auth/send-otp "" "{\"phone\":\"$P2\"}";          expect_code "OTP bheja (contractor signup)" 200
+call POST /auth/verify-otp "" "{\"phone\":\"$P2\",\"otp\":\"123456\",\"name\":\"X\",\"role\":\"USER\"}"; expect_code "worker mobile-OTP signup reject (400)" 400
+call POST /auth/verify-otp "" "{\"phone\":\"$CP\",\"otp\":\"000000\"}"; expect_code "galat OTP reject (401)" 401
 
 echo "== Follow, feed, notification"
 call POST "/follow/$CID" "$UT";                              expect_code "contractor follow" 200
+call PUT /users/me/language "$UT" '{"lang":"hi"}';            expect_code "user language = Hindi" 200
 call POST /jobs "$CT" '{"title":"Painter chahiye","location":"Noida Sector 18","salary":800,"workersNeeded":3}'
 expect_code "dusri job post" 201
 call GET /jobs/feed "$UT";                                   expect_has "feed me followed contractor ki job" "Painter chahiye"
 sleep 3
 call GET /notifications "$UT";                               expect_has "followers ko notification mila" "Painter chahiye"
+expect_has "notification user ki language (Hindi) me" "नई जॉब"
 call GET "/jobs?city=Noida" "$UT";                           expect_has "city search" "Mason chahiye"
 call GET "/jobs/by-contractor/$CID" "$UT";                   expect_has "contractor ki open jobs" "Mason chahiye"
 
 echo "== Apply + applicants"
-call PUT /workers/me/profile "$UT" '{"skills":"Mason, Plaster","experienceYears":5,"about":"Noida me kaam kiya"}'
+call PUT /workers/me/profile "$UT" '{"name":"Test Worker","city":"Noida","phone":"9123456780","skills":"Mason, Plaster","experienceYears":5,"about":"Noida me kaam kiya"}'
 expect_code "worker profile" 200
+call GET /workers/me/profile "$UT";                          expect_has "profile ab complete" '"completed":true'
 call POST "/jobs/$JID/apply" "$UT";                          expect_code "apply" 201
 call POST "/jobs/$JID/apply" "$UT";                          expect_code "dobara apply = 409" 409
 call GET "/jobs/$JID/applicants" "$CT";                      expect_has "contractor ko applicant + skills dikhe" "Mason, Plaster"
+expect_has "worker ka contact phone dikha (apply ke baad)" "9123456780"
 AID=$(echo "$BODY" | grep -o '"applicationId":[0-9]*' | head -1 | cut -d: -f2)
 call PUT "/applications/$AID/status" "$CT" '{"status":"ACCEPTED"}'; expect_code "applicant accept" 200
 call GET /jobs/feed "$CT";                                   expect_code "role check: contractor feed = 403" 403

@@ -19,18 +19,31 @@ public class WorkerProfileService {
 
     private static String clean(String s) { return s == null || s.isBlank() ? null : s.trim(); }
 
+    private User user(Long uid) {
+        return users.findById(uid).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "User not found"));
+    }
+
+    private static WorkerProfileResponse toResponse(User u, WorkerProfile p) {
+        return new WorkerProfileResponse(u.getName(), u.getCity(),
+                p == null ? null : p.getContactPhone(), p == null ? null : p.getSkills(),
+                p == null ? null : p.getExperienceYears(), p == null ? null : p.getAbout(), p != null);
+    }
+
     @Transactional(readOnly = true)
     public WorkerProfileResponse get(Long uid) {
-        return repo.findByUserId(uid).map(WorkerProfileResponse::from).orElse(new WorkerProfileResponse(null, null, null));
+        return toResponse(user(uid), repo.findByUserId(uid).orElse(null));
     }
 
     @Transactional
     public WorkerProfileResponse save(Long uid, WorkerProfileRequest r) {
-        User u = users.findById(uid).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "User nahi mila"));
+        User u = user(uid);
+        if (clean(r.name()) != null) u.setName(clean(r.name()));
+        if (clean(r.city()) != null) u.setCity(clean(r.city()));
         WorkerProfile p = repo.findByUserId(uid).orElseGet(() -> WorkerProfile.builder().user(u).build());
+        p.setContactPhone(clean(r.phone()));
         p.setSkills(clean(r.skills()));
         p.setExperienceYears(r.experienceYears());
         p.setAbout(clean(r.about()));
-        return WorkerProfileResponse.from(repo.save(p));
+        return toResponse(u, repo.save(p));
     }
 }

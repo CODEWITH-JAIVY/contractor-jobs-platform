@@ -266,6 +266,8 @@ function DaySheet({ date, existing, onClose, onSaved }: { date: Date | null; exi
   // sheet khulte hi purani entry se bharo
   React.useEffect(() => {
     if (!date) return;
+    // Reinitialize the existing sheet only when it opens for a different record.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setStatus(existing?.status ?? 'PRESENT');
     setOt(existing ? Number(existing.overtimeHours) : 0);
     setNote(existing?.note ?? '');
@@ -358,6 +360,8 @@ function RateSheet({ visible, settings, onClose, onSaved }: { visible: boolean; 
 
   React.useEffect(() => {
     if (!visible) return;
+    // Reinitialize the existing sheet only when it opens for a different record.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setWage(settings.dailyWage != null ? String(settings.dailyWage) : '');
     setRate(settings.overtimeRate != null ? String(settings.overtimeRate) : '');
     setBusy(false);
@@ -367,8 +371,10 @@ function RateSheet({ visible, settings, onClose, onSaved }: { visible: boolean; 
   const save = async () => {
     setBusy(true);
     try {
-      const w = parseInt(wage, 10);
-      const r = parseInt(rate, 10);
+      if ((wage.trim() && (!/^\d+$/.test(wage.trim()) || Number(wage) > 100000)) ||
+          (rate.trim() && (!/^\d+$/.test(rate.trim()) || Number(rate) > 10000))) throw new Error(t('err.validation'));
+      const w = wage.trim() ? Number(wage) : NaN;
+      const r = rate.trim() ? Number(rate) : NaN;
       await api.put('/attendance/settings', { dailyWage: Number.isNaN(w) ? null : w, overtimeRate: Number.isNaN(r) ? null : r });
       onSaved();
     } catch (e) {
@@ -399,6 +405,8 @@ function PaymentSheet({ visible, onClose, onSaved }: { visible: boolean; onClose
 
   React.useEffect(() => {
     if (!visible) return;
+    // Reinitialize the existing sheet only when it opens for a different record.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setAmount('');
     setNote('');
     setDate(new Date());
@@ -418,8 +426,8 @@ function PaymentSheet({ visible, onClose, onSaved }: { visible: boolean; onClose
   };
 
   const save = async () => {
-    const amt = parseInt(amount, 10);
-    if (Number.isNaN(amt) || amt <= 0) {
+    const amt = /^\d+$/.test(amount.trim()) ? Number(amount) : NaN;
+    if (!Number.isSafeInteger(amt) || amt <= 0 || amt > 1000000) {
       toast(t('att.payInvalid'));
       return;
     }
@@ -438,7 +446,7 @@ function PaymentSheet({ visible, onClose, onSaved }: { visible: boolean; onClose
       <ScrollView keyboardShouldPersistTaps="handled">
         <Text style={{ fontSize: 20, fontWeight: '800', color: C.ink, marginBottom: 14 }}>{t('att.payTitle')}</Text>
         <Field label={t('att.payAmount')} value={amount} onChangeText={setAmount} keyboardType="number-pad" />
-        <Field label={t('att.payNote')} value={note} onChangeText={setNote} />
+        <Field label={t('att.payNote')} value={note} onChangeText={setNote} maxLength={200} />
         <View style={{ marginBottom: 14 }}>
           <BigButton outlined icon="calendar-outline" label={`${date.getDate()} ${monthNames()[date.getMonth()]} ${date.getFullYear()}`} onPress={pickDate} />
         </View>

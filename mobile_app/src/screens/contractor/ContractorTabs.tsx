@@ -83,11 +83,13 @@ function PostJobScreen() {
   const post = async () => {
     setBusy(true);
     try {
-      const sal = parseInt(salary, 10);
-      const w = parseInt(workers, 10);
+      if (!title.trim() || !loc.trim() || (salary.trim() && !/^\d+$/.test(salary.trim())) ||
+          (workers.trim() && (!/^\d+$/.test(workers.trim()) || Number(workers) < 1))) throw new Error(t('err.validation'));
+      const sal = Number(salary);
+      const w = Number(workers);
       await api.post('/jobs', {
         title: title.trim(), location: loc.trim(), description: desc.trim(),
-        salary: Number.isNaN(sal) ? null : sal, workersNeeded: Number.isNaN(w) ? null : w,
+        salary: salary.trim() ? sal : null, workersNeeded: workers.trim() ? w : null,
       });
       setTitle(''); setLoc(''); setSalary(''); setWorkers(''); setDesc('');
       toast(t('pj.done'));
@@ -109,7 +111,7 @@ function PostJobScreen() {
         <View style={{ flex: 1 }}><Field label={t('pj.salary')} value={salary} onChangeText={setSalary} keyboardType="number-pad" /></View>
         <View style={{ flex: 1 }}><Field label={t('pj.workers')} value={workers} onChangeText={setWorkers} keyboardType="number-pad" /></View>
       </View>
-      <Field label={t('pj.details')} value={desc} onChangeText={setDesc} multiline />
+      <Field label={t('pj.details')} value={desc} onChangeText={setDesc} maxLength={2000} multiline />
       <BigButton icon="megaphone-outline" label={busy ? t('common.wait') : t('pj.submit')} onPress={post} disabled={busy} />
     </ScrollView>
   );
@@ -141,7 +143,8 @@ function ProfileScreen() {
   const save = async () => {
     setBusy(true);
     try {
-      const n = parseInt(exp, 10);
+      if (!company.trim() || (exp.trim() && (!/^\d+$/.test(exp.trim()) || Number(exp) > 60))) throw new Error(t('err.validation'));
+      const n = exp.trim() ? Number(exp) : NaN;
       await api.put('/contractors/profile', {
         companyName: company.trim(), workType: work.trim(), experienceYears: Number.isNaN(n) ? null : n, about: about.trim(),
       });
@@ -160,7 +163,7 @@ function ProfileScreen() {
       <Field label={t('cpf.company')} value={company} onChangeText={setCompany} />
       <Field label={t('cpf.workType')} value={work} onChangeText={setWork} />
       <Field label={t('cpf.exp')} value={exp} onChangeText={setExp} keyboardType="number-pad" />
-      <Field label={t('cpf.about')} value={about} onChangeText={setAbout} multiline />
+      <Field label={t('cpf.about')} value={about} onChangeText={setAbout} maxLength={1000} multiline />
       <BigButton label={busy ? t('common.wait') : t('cpf.save')} onPress={save} disabled={busy} />
     </ScrollView>
   );
@@ -177,7 +180,7 @@ function TabIcon({ active, inactive, focused }: { active: IconName; inactive: Ic
 export default function ContractorTabs() {
   const { t } = useT();
   const icon = (active: IconName, inactive: IconName) =>
-    ({ focused }: { focused: boolean }) => <TabIcon active={active} inactive={inactive} focused={focused} />;
+    function TabBarIcon({ focused }: { focused: boolean }) { return <TabIcon active={active} inactive={inactive} focused={focused} />; };
   return (
     <Tab.Navigator screenOptions={tabScreenOptions}>
       <Tab.Screen name="MyJobs" component={MyJobsScreen} options={{ title: t('tab.myJobs'), tabBarIcon: icon('list', 'list-outline') }} />

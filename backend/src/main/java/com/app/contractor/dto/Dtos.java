@@ -9,7 +9,7 @@ import java.time.LocalDate;
 public final class Dtos {
     private Dtos() {}
 
-    public record SendOtpRequest(@NotBlank @Pattern(regexp = "^[6-9]\\d{9}$", message = "10 digit Indian mobile number daalo") String phone) {}
+    public record SendOtpRequest(@NotBlank @Pattern(regexp = "^[6-9]\\d{9}$", message = "Enter a valid 10-digit mobile number") String phone) {}
 
     public record VerifyOtpRequest(
             @NotBlank @Pattern(regexp = "^[6-9]\\d{9}$") String phone,
@@ -59,7 +59,8 @@ public final class Dtos {
                                     String skills, Integer experienceYears, String about) {
         public static ApplicantResponse from(JobApplication a, WorkerProfile p) {
             User u = a.getUser();
-            return new ApplicantResponse(a.getId(), u.getId(), u.getName(), u.getPhone(), u.getCity(), a.getStatus(), a.getCreatedAt(),
+            String phone = u.getPhone() != null ? u.getPhone() : (p == null ? null : p.getContactPhone());
+            return new ApplicantResponse(a.getId(), u.getId(), u.getName(), phone, u.getCity(), a.getStatus(), a.getCreatedAt(),
                     p == null ? null : p.getSkills(), p == null ? null : p.getExperienceYears(), p == null ? null : p.getAbout());
         }
     }
@@ -112,12 +113,17 @@ public final class Dtos {
         }
     }
 
-    public record WorkerProfileRequest(@Size(max = 200) String skills, @Min(0) @Max(60) Integer experienceYears,
+    /** name/city/phone optional: na ho to purana rehta hai. phone khali ("") bhi chalega. */
+    public record WorkerProfileRequest(@Size(max = 100) String name, @Size(max = 100) String city,
+                                       @Pattern(regexp = "^$|^[6-9]\\d{9}$", message = "Enter a valid 10-digit mobile number") String phone,
+                                       @Size(max = 200) String skills, @Min(0) @Max(60) Integer experienceYears,
                                        @Size(max = 1000) String about) {}
 
-    public record WorkerProfileResponse(String skills, Integer experienceYears, String about) {
-        public static WorkerProfileResponse from(WorkerProfile p) {
-            return new WorkerProfileResponse(p.getSkills(), p.getExperienceYears(), p.getAbout());
-        }
-    }
+    /** completed = profile kam se kam ek baar save hui hai (app pehle login par setup screen isi se dikhati hai). */
+    public record WorkerProfileResponse(String name, String city, String phone, String skills, Integer experienceYears,
+                                        String about, boolean completed) {}
+
+    public record DevWorkerRequest(@NotBlank @Email String email, String name) {}
+
+    public record LanguageRequest(@NotBlank @Pattern(regexp = "^(en|hi)$", message = "Language must be en or hi") String lang) {}
 }

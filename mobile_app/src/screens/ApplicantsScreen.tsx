@@ -36,7 +36,7 @@ export default function ApplicantsScreen({ route }: Props) {
             <Avatar name={a.name} />
             <View style={{ flex: 1, marginLeft: 12 }}>
               <Text style={{ fontSize: 16, fontWeight: '700', color: C.ink }}>{a.name}</Text>
-              <Text style={{ color: C.steel }}>{a.phone}</Text>
+              <Text style={{ color: C.steel }}>{a.phone ?? t('ap.noPhone')}</Text>
               {a.city ? <MetaRow icon="location-outline" text={a.city} /> : null}
             </View>
             <StatusPill status={a.status} />
@@ -49,7 +49,9 @@ export default function ApplicantsScreen({ route }: Props) {
           ) : null}
           {a.about ? <Text style={{ marginTop: 8, color: C.steel, lineHeight: 20 }}>{a.about}</Text> : null}
           <View style={{ flexDirection: 'row', gap: 8, marginTop: 12 }}>
-            <BigButton compact outlined icon="call" label={t('common.call')} style={{ flex: 1 }} onPress={() => void Linking.openURL(`tel:${a.phone}`)} />
+            {a.phone ? (
+              <BigButton compact outlined icon="call" label={t('common.call')} style={{ flex: 1 }} onPress={() => void Linking.openURL(`tel:${a.phone}`)} />
+            ) : null}
             {a.status !== 'ACCEPTED' ? (
               <BigButton compact label={t('ap.select')} style={{ flex: 1 }} onPress={() => void setStatus(a, 'ACCEPTED', reload)} />
             ) : null}

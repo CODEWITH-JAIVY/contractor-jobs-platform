@@ -11,7 +11,8 @@ public class User {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-    @Column(nullable = false, unique = true, length = 15)
+    /** Contractor/admin ka login number. Email (Google) se aaye worker ka khali ho sakta hai. */
+    @Column(unique = true, length = 15)
     private String phone;
     @Enumerated(EnumType.STRING) @Column(nullable = false)
     private Role role;
@@ -20,6 +21,9 @@ public class User {
     @Column(unique = true)
     private String googleSub;
     private String email;
+    /** App ki bhasha: en ya hi. Notifications isi me bante hain. */
+    @Column(length = 2)
+    private String lang;
     /** Worker ke apne hisaab ke liye (private). */
     private Integer dailyWage;
     private Integer overtimeRate;
