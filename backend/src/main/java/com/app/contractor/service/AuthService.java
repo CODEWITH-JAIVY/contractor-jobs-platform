@@ -24,6 +24,7 @@ public class AuthService {
     private final OtpService otpService;
     private final UserRepository users;
     private final JwtService jwt;
+    private final Msg91WidgetVerifier widgetVerifier;
     private final GoogleTokenVerifier google;
 
     private static String clean(String s) { return s == null || s.isBlank() ? null : s.trim(); }
@@ -58,6 +59,32 @@ public class AuthService {
         boolean isNew = existing == null;
         User u = isNew
                 ? users.save(User.builder().phone(r.phone()).name(name).role(Role.CONTRACTOR).city(clean(r.city())).build())
+                : existing;
+        return new AuthResponse(jwt.generate(u), u.getId(), u.getRole(), isNew);
+    }
+
+    /** Widget login: app ne MSG91 widget se OTP verify kiya, ab access token aaya hai. */
+    @Transactional
+    public AuthResponse widgetLogin(WidgetLoginRequest r) {
+        // Phone MSG91 se lo, app ke bheje number par bharosa nahi
+        String phone = widgetVerifier.verifyAndGetPhone(r.accessToken());
+
+        User existing = users.findByPhone(phone).orElse(null);
+        if (existing != null && existing.getRole() == Role.USER)
+            throw new ApiException(HttpStatus.BAD_REQUEST, WORKER_USES_GOOGLE);
+
+        String name = clean(r.name());
+        if (existing == null) {
+            if (name == null) throw new ApiException(HttpStatus.BAD_REQUEST, "Name is required for a new account");
+            if (r.role() == Role.ADMIN)
+                throw new ApiException(HttpStatus.FORBIDDEN, "The ADMIN role cannot be chosen at signup");
+            if (r.role() != null && r.role() != Role.CONTRACTOR)
+                throw new ApiException(HttpStatus.BAD_REQUEST, WORKER_USES_GOOGLE);
+        }
+
+        boolean isNew = existing == null;
+        User u = isNew
+                ? users.save(User.builder().phone(phone).name(name).role(Role.CONTRACTOR).city(clean(r.city())).build())
                 : existing;
         return new AuthResponse(jwt.generate(u), u.getId(), u.getRole(), isNew);
     }
