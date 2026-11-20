@@ -16,6 +16,9 @@ public final class Dtos {
             @NotBlank @Size(min = 6, max = 6) String otp,
             String name, Role role, String city) {}
 
+    /** MSG91 OTP widget login: app widget se OTP verify karke access token bhejta hai (phone server MSG91 se leta hai). */
+    public record WidgetLoginRequest(@NotBlank String accessToken, String name, Role role, String city) {}
+
     public record AuthResponse(String token, Long userId, Role role, boolean newUser) {}
 
     public record FcmTokenRequest(@NotBlank String token) {}

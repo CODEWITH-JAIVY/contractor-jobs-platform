@@ -17,6 +17,8 @@ app:
     expiry-ms: ${JWT_EXPIRY_MS:2592000000}   # 30 din (har baar OTP = SMS ka kharcha, isliye lamba)
   otp:
     dev-mode: ${OTP_DEV_MODE:true}   # true = OTP hamesha 123456 (sirf dev)
+  auth:
+    legacy-otp: ${LEGACY_OTP:true}   # false = apna /auth/send-otp + /auth/verify-otp band, sirf MSG91 widget (/auth/widget-login)
   sms:
     provider: ${SMS_PROVIDER:log}    # log | msg91
     msg91:
